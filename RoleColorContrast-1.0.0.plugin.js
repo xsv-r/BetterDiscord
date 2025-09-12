@@ -45,7 +45,7 @@ module.exports = class RoleColorContrast {
             }
       }
 
-      // W3C luminance formula 
+      // W3C relative luminance formula 
       static luminance([r, g, b]) {
             const C = [r, g, b].map(v => {
                   v /= 255;
@@ -95,4 +95,5 @@ module.exports = class RoleColorContrast {
 
             return [r, g, b].map(c => Math.round(c * 255));
       }
+
 };
