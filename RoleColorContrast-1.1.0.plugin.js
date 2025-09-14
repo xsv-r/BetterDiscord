@@ -43,7 +43,7 @@ module.exports = class RoleColorContrast {
             const rgb = getComputedStyle(node).color.match(/\d+/g).map(Number);
             const lum = RoleColorContrast.luminance(rgb);
 
-            // If the color is too dark, lighten it
+            // If the color is too dark, lighten it (if below threshold (5%), lighten it (33%))
             if (lum < 0.05) {
                   node.setAttribute(RoleColorContrast.ATTR_NAME, originalColor);
                   const lighter = RoleColorContrast.lighten(rgb, 0.33);
@@ -108,5 +108,6 @@ module.exports = class RoleColorContrast {
             return [r, g, b].map(c => Math.round(c * 255));
       }
 };
+
 
 
