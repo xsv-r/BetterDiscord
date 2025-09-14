@@ -57,7 +57,7 @@ module.exports = class RoleColorContrast {
                   node.removeAttribute(RoleColorContrast.ATTR_NAME);
             });
       }
-   // w3c relative luminance 
+   // relative luminance from w3c
       static luminance([r, g, b]) {
             const C = [r, g, b].map(v => {
                   v /= 255;
@@ -108,4 +108,5 @@ module.exports = class RoleColorContrast {
             return [r, g, b].map(c => Math.round(c * 255));
       }
 };
+
 
