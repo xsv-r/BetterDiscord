@@ -1,6 +1,6 @@
 /**
- * @name RoleColorContrast 1.0.0
- * @version 1.0.0
+ * @name RoleColorContrast
+ * @version 1.1.0
  * @author vari @variare
  * @description lightens role-colors that are too dark against theme background
  */
@@ -8,6 +8,9 @@
 module.exports = class RoleColorContrast {
       static get SELECTORS() {
             return ".username_c19a55, .name__4eb92, .user__7d04b, .mention__3b95d, .headerText__05c5e, .title__10613";
+      }
+      static get ATTR_NAME() {
+            return 'data-original-color';
       }
 
       constructor() {
@@ -22,30 +25,39 @@ module.exports = class RoleColorContrast {
             });
       }
 
-      start() {
+     start() {
             this.observer.observe(document.body, { childList: true, subtree: true });
             document.querySelectorAll(RoleColorContrast.SELECTORS).forEach(n => this.processNode(n));
       }
 
-      stop() {
+ stop() {
             this.observer.disconnect();
+            this.revertAllNodes();
       }
 
-      processNode(node) {
-            // skip nodes that don't have an inline color
-            if (!node.style.color) return;
+    processNode(node) {
+            // Skip nodes that don't have an inline color or have already been processed
+            if (!node.style.color || node.hasAttribute(RoleColorContrast.ATTR_NAME)) return;
 
+            const originalColor = node.style.color; // Get the original color
             const rgb = getComputedStyle(node).color.match(/\d+/g).map(Number);
             const lum = RoleColorContrast.luminance(rgb);
 
-            // bump up super dark colors so they're readable on dark themes (if below threshold (5%), lighten it (33%))
+            // If the color is too dark, lighten it
             if (lum < 0.05) {
+                  node.setAttribute(RoleColorContrast.ATTR_NAME, originalColor);
                   const lighter = RoleColorContrast.lighten(rgb, 0.33);
                   node.style.color = `rgb(${lighter.join(",")})`;
             }
       }
-
-      // W3C relative luminance formula 
+      // Revert changes made by the plugin
+      revertAllNodes() {
+            document.querySelectorAll(`[${RoleColorContrast.ATTR_NAME}]`).forEach(node => {
+                  node.style.color = node.getAttribute(RoleColorContrast.ATTR_NAME);
+                  node.removeAttribute(RoleColorContrast.ATTR_NAME);
+            });
+      }
+   // w3c relative luminance 
       static luminance([r, g, b]) {
             const C = [r, g, b].map(v => {
                   v /= 255;
@@ -54,7 +66,7 @@ module.exports = class RoleColorContrast {
             return 0.2126 * C[0] + 0.7152 * C[1] + 0.0722 * C[2];
       }
 
-      // RGB -> HSL -> lighten -> RGB conversion
+     // RGB -> HSL -> lighten -> RGB conversion
       static lighten([r, g, b], amount) {
             r /= 255; g /= 255; b /= 255;
             const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -95,5 +107,5 @@ module.exports = class RoleColorContrast {
 
             return [r, g, b].map(c => Math.round(c * 255));
       }
-
 };
+
